@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouBzz</title>
+    <style>
+        body { 
+            margin:0; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+            background:#0f0f0f; 
+            color:#f1f1f1; 
+        }
+        header {
+            background:#0f0f0f;
+            border-bottom:1px solid #272727;
+            padding:8px 16px;
+            display:flex; 
+            align-items:center; 
+            justify-content:space-between;
+            position:sticky; top:0; z-index:100;
+            box-shadow:0 1px 4px rgba(0,0,0,0.4);
+        }
+        .logo img { height:38px; width:auto; }
+        .logo span { 
+            /* Removido o span vermelho */
+            display: none; 
+        }
+        .user-info { font-weight:500; font-size:14px; color:#aaa; }
+        .upload-btn {
+            padding:8px 16px; 
+            background:#3ea6ff; 
+            color:#fff; 
+            border:none;
+            border-radius:20px;
+            cursor:pointer; 
+            font-weight:500;
+        }
+        .search-bar { 
+            text-align:center; 
+            padding:12px 16px; 
+            background:#0f0f0f; 
+            border-bottom:1px solid #272727; 
+        }
+        .search-bar input { 
+            width: min(620px, 85%); 
+            max-width:620px;
+            padding:10px 16px; 
+            font-size:16px; 
+            background:#121212;
+            color:#eee;
+            border:1px solid #303030; 
+            border-radius:40px 0 0 40px;
+            outline:none;
+        }
+        .search-bar input::placeholder { color:#888; }
+        .search-bar button { 
+            padding:10px 20px; 
+            background:#222; 
+            color:#eee; 
+            border:1px solid #303030; 
+            border-left:none;
+            border-radius:0 40px 40px 0;
+            cursor:pointer;
+        }
+        #main { 
+            max-width:1280px; 
+            margin:0 auto; 
+            padding:16px; 
+        }
+        .section-title {
+            font-size:18px; 
+            font-weight:500; 
+            margin:24px 0 12px;
+            color:#f1f1f1;
+        }
+        .videos-grid {
+            display:grid; 
+            grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); 
+            gap:16px 12px;
+        }
+        .video-card {
+            background:#1e1e1e; 
+            border-radius:12px; 
+            overflow:hidden;
+            cursor:pointer; 
+            transition: all 0.15s;
+        }
+        .video-card:hover { 
+            transform:translateY(-4px); 
+            box-shadow:0 6px 16px rgba(0,0,0,0.5);
+        }
+        .thumb {
+            width:100%; 
+            aspect-ratio:16/9; 
+            object-fit:cover; 
+            display:block;
+            background:#000;
+        }
+        .video-info { 
+            padding:12px; 
+            font-size:14px; 
+        }
+        .video-title { 
+            font-weight:500; 
+            margin:0 0 6px; 
+            line-height:1.4; 
+            max-height:2.8em; 
+            overflow:hidden; 
+            display:-webkit-box; 
+            -webkit-line-clamp:2; 
+            -webkit-box-orient:vertical;
+        }
+        .video-meta { 
+            color:#aaa; 
+            font-size:13px; 
+        }
+
+        /* Watch page */
+        #watch-page { 
+            display:none; 
+            max-width:1280px; 
+            margin:0 auto; 
+            padding:16px 24px; 
+        }
+        .watch-container {
+            display:flex; 
+            gap:24px; 
+            flex-direction:row;
+        }
+        .watch-left {
+            flex:1 1 0;
+            min-width:0;
+        }
+        .watch-player-container { 
+            position:relative; 
+            padding-bottom:56.25%; 
+            height:0; 
+            overflow:hidden; 
+            background:#000; 
+            border-radius:12px;
+            margin-bottom:16px;
+        }
+        #watch-player { 
+            position:absolute; 
+            top:0; left:0; 
+            width:100%; height:100%; 
+            border:none;
+        }
+        #watch-title { 
+            font-size:20px; 
+            font-weight:500; 
+            line-height:1.4; 
+            margin:0 0 8px;
+        }
+        #watch-meta { 
+            color:#aaa; 
+            font-size:14px; 
+            margin-bottom:12px;
+        }
+        #watch-stats { 
+            display:flex; 
+            align-items:center; 
+            gap:16px; 
+            margin:16px 0;
+            font-size:14px;
+        }
+        .stat { font-weight:500; }
+        .like-btn {
+            display:flex; 
+            align-items:center; 
+            gap:6px;
+            padding:8px 18px; 
+            background:#272727; 
+            color:#eee; 
+            border:none; 
+            border-radius:20px;
+            cursor:pointer; 
+            font-weight:500;
+        }
+        .like-btn:hover { background:#333; }
+        .back-btn {
+            padding:8px 16px; 
+            background:#3ea6ff; 
+            color:#fff; 
+            border:none; 
+            border-radius:20px;
+            cursor:pointer; 
+            margin-bottom:16px;
+            font-weight:500;
+        }
+
+        .watch-right {
+            width:380px;
+            flex-shrink:0;
+        }
+        .suggested-grid {
+            display:flex; 
+            flex-direction:column; 
+            gap:12px;
+        }
+        .suggested-card {
+            display:flex; 
+            gap:12px;
+            cursor:pointer;
+        }
+        .suggested-thumb {
+            width:168px; 
+            aspect-ratio:16/9; 
+            object-fit:cover; 
+            border-radius:8px;
+            background:#000;
+        }
+        .suggested-info {
+            flex:1;
+        }
+        .suggested-title {
+            font-size:14px; 
+            font-weight:500; 
+            line-height:1.4; 
+            margin:0 0 4px;
+        }
+        .suggested-channel {
+            font-size:13px; 
+            color:#aaa;
+        }
+
+        #comments-section { 
+            margin-top:24px; 
+            padding-top:16px; 
+            border-top:1px solid #272727;
+        }
+        .comment-form { 
+            margin-bottom:20px; 
+        }
+        textarea { 
+            width:100%; 
+            min-height:60px; 
+            padding:12px; 
+            background:#121212;
+            color:#eee;
+            border:1px solid #303030; 
+            border-radius:8px; 
+            resize:vertical;
+            font-family:inherit;
+        }
+        textarea::placeholder { color:#888; }
+        .comment { 
+            padding:12px 0; 
+            border-bottom:1px solid #272727; 
+        }
+        .comment-user { 
+            font-weight:500; 
+            color:#3ea6ff; 
+        }
+
+        #upload-section {
+            display:none; 
+            background:#1e1e1e; 
+            padding:20px; 
+            border-radius:12px; 
+            border:1px solid #272727; 
+            max-width:600px; 
+            margin:20px auto;
+        }
+
+        @media (max-width: 960px) {
+            .watch-container { flex-direction:column; }
+            .watch-right { width:100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <img src="YouBzz.png" alt="YouBzz">
+        <!-- Texto vermelho removido -->
+    </div>
+    <div>
+        <span class="user-info" id="current-user">Hello, Visitor</span>
+        <button class="upload-btn" onclick="toggleUpload()">Upload Video</button>
+    </div>
+</header>
+
+<div class="search-bar">
+    <input type="text" id="q" placeholder="Search videos...">
+    <button onclick="search()">Search</button>
+</div>
+
+<div id="main">
+    <div id="upload-section">
+        <h3>Add video from Streamable</h3>
+        <p>Paste the link (e.g. https://streamable.com/ok5p84)</p>
+        <input type="text" id="streamableLink" placeholder="https://streamable.com/xxxxx" style="width:100%; padding:10px; margin:10px 0; background:#121212; color:#eee; border:1px solid #303030; border-radius:8px;">
+        <input type="text" id="videoTitle" placeholder="Video title (optional)" style="width:100%; padding:10px; margin:10px 0; background:#121212; color:#eee; border:1px solid #303030; border-radius:8px;">
+        <button onclick="addStreamableVideo()" style="padding:10px 20px; background:#3ea6ff; color:white; border:none; border-radius:20px; cursor:pointer;">Add</button>
+        <p id="upload-status" style="color:#3ea6ff; margin-top:12px; font-weight:500;"></p>
+    </div>
+
+    <div class="section-title">Videos</div>
+    <div id="videos" class="videos-grid"></div>
+</div>
+
+<div id="watch-page">
+    <button class="back-btn" onclick="backToHome()">← Back to Home</button>
+
+    <div class="watch-container">
+        <div class="watch-left">
+            <div class="watch-player-container">
+                <iframe id="watch-player" allowfullscreen></iframe>
+            </div>
+
+            <h1 id="watch-title">Loading...</h1>
+            <div id="watch-meta"></div>
+
+            <div id="watch-stats">
+                <span class="stat" id="watch-views">0 views</span>
+                <button class="like-btn" onclick="likeVideo()">
+                    👍 Like (<span id="watch-likes">0</span>)
+                </button>
+            </div>
+
+            <div id="comments-section">
+                <h3>Comments</h3>
+                <div class="comment-form">
+                    <textarea id="commentText" placeholder="Add a comment..."></textarea>
+                    <button onclick="addComment()" style="margin-top:8px; padding:8px 16px; background:#3ea6ff; color:white; border:none; border-radius:20px; cursor:pointer;">Comment</button>
+                </div>
+                <div id="comments-list"></div>
+            </div>
+        </div>
+
+        <div class="watch-right">
+            <div class="section-title">Up next</div>
+            <div id="suggested-videos" class="suggested-grid"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// O script continua exatamente o mesmo que enviei antes
+// (só mudei as cores no CSS, o JS não precisou de alteração)
+
+let currentUser = JSON.parse(localStorage.getItem('youBzzUser')) || null;
+
+function checkProfile() {
+    if (!currentUser) {
+        const name = prompt("Welcome to YouBzz!\nEnter your username:");
+        if (name && name.trim()) {
+            currentUser = { name: name.trim() };
+            localStorage.setItem('youBzzUser', JSON.stringify(currentUser));
+        } else {
+            currentUser = { name: 'Visitor' };
+        }
+    }
+    document.getElementById('current-user').textContent = `Hello, ${currentUser.name}`;
+}
+
+let userVideos = JSON.parse(localStorage.getItem('youBzzVideos')) || [];
+
+function saveVideos() {
+    localStorage.setItem('youBzzVideos', JSON.stringify(userVideos));
+}
+
+let currentVideoIndex = -1;
+
+function toggleUpload() {
+    const section = document.getElementById('upload-section');
+    section.style.display = section.style.display === 'block' ? 'none' : 'block';
+    if (section.style.display === 'block') section.scrollIntoView({behavior: 'smooth'});
+}
+
+function addStreamableVideo() {
+    let link = document.getElementById('streamableLink').value.trim();
+    const title = document.getElementById('videoTitle').value.trim() || 'Untitled Video';
+    if (!link) return alert('Paste a Streamable link!');
+    const match = link.match(/streamable\.com\/([a-z0-9]+)/i);
+    if (!match || !match[1]) return alert('Invalid link!');
+    const id = match[1];
+    const embedUrl = `https://streamable.com/e/${id}`;
+
+    userVideos.push({
+        title,
+        embedUrl,
+        addedBy: currentUser.name,
+        type: 'streamable',
+        views: 0,
+        likes: 0,
+        comments: []
+    });
+    saveVideos();
+    loadVideos();
+    document.getElementById('streamableLink').value = '';
+    document.getElementById('videoTitle').value = '';
+    document.getElementById('upload-status').textContent = 'Video added!';
+    setTimeout(() => document.getElementById('upload-status').textContent = '', 3000);
+}
+
+function loadVideos(youtubeItems = []) {
+    const container = document.getElementById('videos');
+    container.innerHTML = '';
+
+    userVideos.forEach((v, index) => {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.innerHTML = `
+            <div class="thumb" style="background:#000 url('https://via.placeholder.com/320x180/1e1e1e/aaa?text=${encodeURIComponent(v.title.substring(0,20))}') center/cover;"></div>
+            <div class="video-info">
+                <div class="video-title">${v.title}</div>
+                <div class="video-meta">${v.addedBy} • Streamable</div>
+            </div>
+        `;
+        card.onclick = () => openWatch(index);
+        container.appendChild(card);
+    });
+
+    youtubeItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.innerHTML = `
+            <img class="thumb" src="${item.snippet.thumbnails.medium.url}" alt="">
+            <div class="video-info">
+                <div class="video-title">${item.snippet.title}</div>
+                <div class="video-meta">${item.snippet.channelTitle}</div>
+            </div>
+        `;
+        card.onclick = () => window.open(`https://www.youtube.com/watch?v=${item.id.videoId}`, '_blank');
+        container.appendChild(card);
+    });
+}
+
+function openWatch(index) {
+    currentVideoIndex = index;
+    const video = userVideos[index];
+    if (!video) return;
+
+    video.views = (video.views || 0) + 1;
+    saveVideos();
+
+    document.getElementById('main').style.display = 'none';
+    document.getElementById('watch-page').style.display = 'block';
+
+    document.getElementById('watch-title').textContent = video.title;
+    document.getElementById('watch-meta').textContent = `Uploaded by ${video.addedBy} • Streamable`;
+    document.getElementById('watch-views').textContent = `${video.views} views`;
+    document.getElementById('watch-likes').textContent = video.likes || 0;
+    document.getElementById('watch-player').src = video.embedUrl;
+
+    const list = document.getElementById('comments-list');
+    list.innerHTML = '';
+    (video.comments || []).forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'comment';
+        div.innerHTML = `<span class="comment-user">${c.user}:</span> ${c.text}`;
+        list.appendChild(div);
+    });
+
+    loadSuggestedVideos();
+}
+
+function loadSuggestedVideos() {
+    const container = document.getElementById('suggested-videos');
+    container.innerHTML = '';
+    userVideos
+        .filter((_, i) => i !== currentVideoIndex)
+        .slice(0, 6)
+        .forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'suggested-card';
+            card.innerHTML = `
+                <div class="suggested-thumb" style="background:#000 url('https://via.placeholder.com/168x94/1e1e1e/aaa?text=${encodeURIComponent(v.title.substring(0,15))}') center/cover;"></div>
+                <div class="suggested-info">
+                    <div class="suggested-title">${v.title}</div>
+                    <div class="suggested-channel">${v.addedBy}</div>
+                </div>
+            `;
+            card.onclick = () => {
+                const idx = userVideos.indexOf(v);
+                if (idx !== -1) openWatch(idx);
+            };
+            container.appendChild(card);
+        });
+}
+
+function likeVideo() {
+    if (currentVideoIndex < 0) return;
+    const video = userVideos[currentVideoIndex];
+    video.likes = (video.likes || 0) + 1;
+    saveVideos();
+    document.getElementById('watch-likes').textContent = video.likes;
+}
+
+function addComment() {
+    if (currentVideoIndex < 0) return;
+    const text = document.getElementById('commentText').value.trim();
+    if (!text) return alert('Write a comment!');
+    const video = userVideos[currentVideoIndex];
+    if (!video.comments) video.comments = [];
+    video.comments.push({ user: currentUser.name, text });
+    saveVideos();
+
+    const list = document.getElementById('comments-list');
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.innerHTML = `<span class="comment-user">${currentUser.name}:</span> ${text}`;
+    list.appendChild(div);
+    document.getElementById('commentText').value = '';
+}
+
+function backToHome() {
+    document.getElementById('watch-page').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    document.getElementById('watch-player').src = '';
+    currentVideoIndex = -1;
+    loadVideos();
+}
+
+const API_KEY = "AIzaSyC1omlJST8_r6V1rdaZ2X5aVaRDJehNbkY";
+
+async function search() {
+    const q = document.getElementById('q').value.trim();
+    document.getElementById('upload-section').style.display = 'none';
+    if (!q) return loadVideos();
+
+    try {
+        const res = await fetch(
+            `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(q)}&maxResults=12&key=${API_KEY}`
+        );
+        const data = await res.json();
+        loadVideos(data.items || []);
+    } catch (err) {
+        alert('Search error');
+    }
+}
+
+checkProfile();
+loadVideos();
+</script>
+</body>
+</html>
