@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <title>YouBzz</title>
@@ -8,102 +8,75 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
 <style>
-body {
-    margin:0;
-    font-family:Arial;
-    background:#0a0a0a;
-    color:#eee;
-}
-
-header {
-    background:#1a1a1a;
-    border-bottom:2px solid #333;
-    padding:10px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
+body { margin:0; font-family:Arial; background:#0a0a0a; color:#eee; }
+header { background:#1a1a1a; border-bottom:2px solid #333; padding:10px; display:flex; justify-content:space-between; align-items:center; }
 .logo img { height:35px; }
+.profile { display:flex; align-items:center; gap:10px; }
+.profile img { width:32px; height:32px; border-radius:50%; }
+button { background:#2a2a2a; border:1px solid #444; color:white; padding:6px 10px; cursor:pointer; }
 
-.profile {
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
+.videos-grid { display:grid; grid-template-columns:repeat(auto-fill, 220px); gap:10px; padding:10px; }
+.video-card { background:#1a1a1a; border:1px solid #333; cursor:pointer; padding:5px; }
+.thumb { height:130px; display:flex; align-items:center; justify-content:center; background:#000; font-size:30px; }
 
-.profile img {
-    width:32px;
-    height:32px;
-    border-radius:50%;
-}
-
-button {
-    background:#2a2a2a;
-    border:1px solid #444;
-    color:white;
-    padding:6px 10px;
-    cursor:pointer;
-}
-
-.videos-grid {
-    display:grid;
-    grid-template-columns:repeat(auto-fill, 220px);
-    gap:10px;
-    padding:10px;
-}
-
-.video-card {
-    background:#1a1a1a;
-    border:1px solid #333;
-    cursor:pointer;
-    padding:5px;
-}
-
-.thumb {
-    height:130px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#000;
-    font-size:30px;
-}
-
-/* PLAYER PERFEITO */
-.player-wrapper {
-    position: relative;
+/* ÁREA DO PLAYER */
+.player-section {
     width: 100%;
     max-width: 900px;
-    aspect-ratio: 16 / 9;
-    background: black;
+    margin: 10px 0; /* Alinhado à esquerda */
 }
 
-.player-wrapper video,
-.player-wrapper iframe {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+.player-wrapper { 
+    width: 100%; 
+    aspect-ratio: 16 / 9; 
+    background: black; 
+    border: 1px solid #333;
 }
 
-textarea {
-    width:100%;
-    background:#111;
-    color:white;
-    border:1px solid #333;
+#myVideo { width: 100%; height: 100%; object-fit: contain; }
+
+/* BOTÕES COLADOS NA ESQUERDA */
+.custom-controls {
+    display: flex;
+    justify-content: flex-start; /* ALINHA NA ESQUERDA */
+    background: #111;
+    padding: 5px;
+    border: 1px solid #333;
+    border-top: none;
+    gap: 0; /* COLADOS */
 }
+
+.custom-btn {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Sprites */
+#btn-play { background-image: url('3.png'); }
+#btn-play:hover { background-image: url('4.png'); }
+#btn-pause { background-image: url('1.png'); }
+#btn-pause:hover { background-image: url('2.png'); }
+
+/* INFO E COMENTÁRIOS EMBAIXO */
+.video-info-bottom {
+    padding: 20px;
+    max-width: 900px;
+}
+
+textarea { width:100%; background:#111; color:white; border:1px solid #333; margin-top:10px; box-sizing: border-box; }
 </style>
 </head>
 
 <body>
 
 <header>
-    <div class="logo">
-        <img src="YouBzz.png">
-    </div>
-
+    <div class="logo"><img src="YouBzz.png"></div>
     <div class="profile">
-        <img id="avatar">
-        <span id="username"></span>
+        <img id="avatar"> <span id="username"></span>
         <button onclick="editProfile()">Edit</button>
         <button onclick="toggleUpload()">Upload</button>
     </div>
@@ -111,8 +84,8 @@ textarea {
 
 <div id="upload" style="display:none; padding:10px;">
     <h3>Add Video</h3>
-    <input id="url" placeholder="video url">
-    <input id="title" placeholder="title">
+    <input id="url" placeholder="Video URL">
+    <input id="title" placeholder="Title">
     <button onclick="add()">Add</button>
 </div>
 
@@ -121,59 +94,36 @@ textarea {
 </div>
 
 <div id="watch" style="display:none; padding:10px;">
-    <button onclick="back()">← Back</button>
+    <button onclick="back()">← Voltar</button>
 
-    <div class="player-wrapper">
-        <div id="player-container"></div>
+    <div class="player-section">
+        <div class="player-wrapper">
+            <div id="player-target" style="height:100%"></div>
+        </div>
+        
+        <div class="custom-controls">
+            <div id="btn-play" class="custom-btn" onclick="controlVideo('play')"></div>
+            <div id="btn-pause" class="custom-btn" onclick="controlVideo('pause')"></div>
+        </div>
     </div>
 
-    <h2 id="vtitle"></h2>
-    <p id="vowner"></p>
+    <div class="video-info-bottom">
+        <h2 id="vtitle"></h2>
+        <p id="vowner" style="color:#aaa;"></p>
+        <p>👁 <span id="views">0</span> | 👍 <span id="likes">0</span></p>
+        <button onclick="like()">Like 👍</button>
 
-    <p>👁 <span id="views">0</span> | 👍 <span id="likes">0</span></p>
-    <button onclick="like()">Like</button>
+        <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
 
-    <h3>Comments</h3>
-    <textarea id="commentText"></textarea>
-    <button onclick="comment()">Send</button>
-    <div id="comments"></div>
+        <h3>Comentários</h3>
+        <textarea id="commentText" rows="3" placeholder="Escreva algo..."></textarea>
+        <button onclick="comment()">Enviar</button>
+        <div id="comments" style="margin-top:20px;"></div>
+    </div>
 </div>
 
 <script>
-// PERFIL
-let profile = JSON.parse(localStorage.getItem("youbzzProfile"));
-
-if(!profile){
-    const name = prompt("Digite seu nome:");
-    const avatar = prompt("Link da foto:");
-
-    profile = {
-        name: name || "User",
-        avatar: avatar || "https://i.imgur.com/HeIi0wU.png"
-    };
-
-    localStorage.setItem("youbzzProfile", JSON.stringify(profile));
-}
-
-function updateProfile(){
-    document.getElementById("username").innerText = profile.name;
-    document.getElementById("avatar").src = profile.avatar;
-}
-
-function editProfile(){
-    const name = prompt("Novo nome:", profile.name);
-    const avatar = prompt("Nova foto:", profile.avatar);
-
-    profile.name = name || profile.name;
-    profile.avatar = avatar || profile.avatar;
-
-    localStorage.setItem("youbzzProfile", JSON.stringify(profile));
-    updateProfile();
-}
-
-updateProfile();
-
-// FIREBASE
+// CONFIG FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyDZWRwM3T-ejo3n-geNliqhFs6-i7I5fjk",
   authDomain: "youbzz-ce459.firebaseapp.com",
@@ -187,138 +137,90 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const videosRef = firebase.database().ref("videos");
 
+let profile = JSON.parse(localStorage.getItem("youbzzProfile")) || {name: "User", avatar: "https://i.imgur.com/HeIi0wU.png"};
+function updateProfile(){
+    document.getElementById("username").innerText = profile.name;
+    document.getElementById("avatar").src = profile.avatar;
+}
+updateProfile();
+
+function editProfile(){
+    profile.name = prompt("Novo nome:", profile.name) || profile.name;
+    profile.avatar = prompt("Nova foto:", profile.avatar) || profile.avatar;
+    localStorage.setItem("youbzzProfile", JSON.stringify(profile));
+    updateProfile();
+}
+
 let videos = [];
 let currentVideoKey = null;
 
-// REALTIME
-videosRef.on("value", snap=>{
+videosRef.on("value", snap => {
     const data = snap.val();
     videos = data ? Object.entries(data).map(([k,v])=>({key:k,...v})) : [];
-    load();
-
-    if(currentVideoKey){
-        const v = videos.find(x=>x.key===currentVideoKey);
-        if(v){
-            document.getElementById("views").innerText = v.views || 0;
-            document.getElementById("likes").innerText = v.likes || 0;
-            document.getElementById("vowner").innerText = "Posted by: " + v.owner;
-
-            const list = document.getElementById("comments");
-            list.innerHTML="";
-            (v.comments||[]).forEach(c=>{
-                const d=document.createElement("div");
-                d.innerText = c.user + ": " + c.text;
-                list.appendChild(d);
-            });
-        }
-    }
+    renderGrid();
 });
 
-// ADD VIDEO
-function add(){
-    const url = document.getElementById("url").value;
-    const title = document.getElementById("title").value || "Untitled";
-
-    videosRef.push({
-        title,
-        videoUrl:url,
-        owner: profile.name,
-        views:0,
-        likes:0,
-        comments:[]
-    });
-}
-
-// GRID
-function load(){
+function renderGrid(){
     const container=document.getElementById("videos");
     container.innerHTML="";
-
     videos.forEach(v=>{
         const div=document.createElement("div");
         div.className="video-card";
-        div.innerHTML=`
-        <div class="thumb">▶</div>
-        <div>${v.title}</div>
-        <small>${v.owner}</small>`;
+        div.innerHTML = `<div class="thumb">▶</div><div>${v.title}</div><small>${v.owner}</small>`;
         div.onclick=()=>watch(v);
         container.appendChild(div);
     });
 }
 
-// PLAYER PERFEITO
 function loadPlayer(url){
-    const container=document.getElementById("player-container");
-    container.innerHTML="";
-
-    const video=document.createElement("video");
-    video.controls=true;
-
-    const source=document.createElement("source");
-    source.src=url;
-
-    if(url.includes(".mp4")) source.type="video/mp4";
-    else if(url.includes(".webm")) source.type="video/webm";
-    else if(url.includes(".mov")) source.type="video/quicktime";
-
-    video.appendChild(source);
-
-    video.onerror=()=>{
-        container.innerHTML=`<iframe src="${url}"></iframe>`;
-    };
-
+    const container = document.getElementById("player-target");
+    container.innerHTML = "";
+    const video = document.createElement("video");
+    video.id = "myVideo";
+    video.src = url;
+    video.style.width = "100%";
+    video.style.height = "100%";
     container.appendChild(video);
 }
 
-// WATCH
+function controlVideo(action) {
+    const vid = document.getElementById("myVideo");
+    if(!vid) return;
+    if(action === 'play') vid.play();
+    else vid.pause();
+}
+
 function watch(v){
     currentVideoKey = v.key;
-
     document.getElementById("main").style.display="none";
     document.getElementById("watch").style.display="block";
-
     loadPlayer(v.videoUrl);
-
     document.getElementById("vtitle").innerText=v.title;
-    document.getElementById("vowner").innerText="Posted by: "+v.owner;
-
-    videosRef.child(v.key).child("views")
-    .transaction(x=>(x||0)+1);
+    document.getElementById("vowner").innerText="Postado por: " + v.owner;
+    videosRef.child(v.key).child("views").transaction(x=>(x||0)+1);
 }
 
-// LIKE
-function like(){
-    videosRef.child(currentVideoKey).child("likes")
-    .transaction(x=>(x||0)+1);
-}
-
-// COMMENT
-function comment(){
-    const text=document.getElementById("commentText").value;
-    if(!text) return;
-
-    videosRef.child(currentVideoKey).child("comments")
-    .transaction(c=>{
-        c=c||[];
-        c.push({user: profile.name, text});
-        return c;
-    });
-
-    document.getElementById("commentText").value="";
-}
-
-// BACK
 function back(){
+    const vid = document.getElementById("myVideo");
+    if(vid) vid.pause();
     document.getElementById("watch").style.display="none";
     document.getElementById("main").style.display="block";
 }
 
-// UI
+function add(){
+    const url = document.getElementById("url").value;
+    const title = document.getElementById("title").value || "Sem título";
+    if(url) {
+        videosRef.push({ title, videoUrl:url, owner: profile.name, views:0, likes:0 });
+        document.getElementById("url").value = "";
+        toggleUpload();
+    }
+}
+
 function toggleUpload(){
     const el=document.getElementById("upload");
     el.style.display = el.style.display==="none"?"block":"none";
 }
 </script>
-
 </body>
 </html>
