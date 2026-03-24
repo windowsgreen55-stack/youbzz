@@ -2,72 +2,50 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>YouBzz</title>
+<title>YouBzz - Player Custom</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
 <style>
-body { margin:0; font-family:Arial; background:#0a0a0a; color:#eee; }
-header { background:#1a1a1a; border-bottom:2px solid #333; padding:10px; display:flex; justify-content:space-between; align-items:center; }
+/* MUDANÇA PARA TEMA CLARO */
+body { margin:0; font-family:Arial, sans-serif; background:#f9f9f9; color:#333; }
+header { background:#ffffff; border-bottom:1px solid #ddd; padding:10px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .logo img { height:35px; }
 .profile { display:flex; align-items:center; gap:10px; }
-.profile img { width:32px; height:32px; border-radius:50%; }
-button { background:#2a2a2a; border:1px solid #444; color:white; padding:6px 10px; cursor:pointer; }
+.profile img { width:32px; height:32px; border-radius:50%; border: 1px solid #ccc; }
 
-.videos-grid { display:grid; grid-template-columns:repeat(auto-fill, 220px); gap:10px; padding:10px; }
-.video-card { background:#1a1a1a; border:1px solid #333; cursor:pointer; padding:5px; }
-.thumb { height:130px; display:flex; align-items:center; justify-content:center; background:#000; font-size:30px; }
+button { background:#efefef; border:1px solid #ccc; color:#333; padding:6px 12px; cursor:pointer; border-radius: 4px; transition: 0.2s; }
+button:hover { background: #e0e0e0; }
+
+.videos-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:15px; padding:20px; }
+.video-card { background:#fff; border:1px solid #ddd; cursor:pointer; padding:10px; border-radius: 8px; transition: transform 0.2s; }
+.video-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.thumb { height:130px; display:flex; align-items:center; justify-content:center; background:#eee; font-size:30px; border-radius: 4px; margin-bottom: 8px; color: #555; }
 
 /* ÁREA DO PLAYER */
-.player-section {
-    width: 100%;
-    max-width: 900px;
-    margin: 10px 0; /* Alinhado à esquerda */
-}
-
-.player-wrapper { 
-    width: 100%; 
-    aspect-ratio: 16 / 9; 
-    background: black; 
-    border: 1px solid #333;
-}
-
+.player-section { width: 100%; max-width: 900px; margin: 10px 0; }
+.player-wrapper { width: 100%; aspect-ratio: 16 / 9; background: #000; border: 1px solid #ddd; border-radius: 8px 8px 0 0; overflow: hidden; }
 #myVideo { width: 100%; height: 100%; object-fit: contain; }
 
-/* BOTÕES COLADOS NA ESQUERDA */
-.custom-controls {
-    display: flex;
-    justify-content: flex-start; /* ALINHA NA ESQUERDA */
-    background: #111;
-    padding: 5px;
-    border: 1px solid #333;
-    border-top: none;
-    gap: 0; /* COLADOS */
-}
+/* CONTROLES */
+.custom-controls { display: flex; justify-content: flex-start; background: #f1f1f1; padding: 5px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; }
+.custom-btn { width: 50px; height: 50px; cursor: pointer; background-size: contain; background-repeat: no-repeat; background-position: center; }
 
-.custom-btn {
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-/* Sprites */
+/* Sprites (Mantidos conforme original) */
 #btn-play { background-image: url('3.png'); }
 #btn-play:hover { background-image: url('4.png'); }
 #btn-pause { background-image: url('1.png'); }
 #btn-pause:hover { background-image: url('2.png'); }
 
-/* INFO E COMENTÁRIOS EMBAIXO */
-.video-info-bottom {
-    padding: 20px;
-    max-width: 900px;
-}
+/* INFO E COMENTÁRIOS */
+.video-info-bottom { padding: 20px; max-width: 900px; }
+#vowner { color:#666; font-size: 0.9em; }
+textarea { width:100%; background:#fff; color:#333; border:1px solid #ccc; margin-top:10px; box-sizing: border-box; padding: 10px; border-radius: 4px; }
+.comment-item { background: #fff; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 5px; border-radius: 4px; }
 
-textarea { width:100%; background:#111; color:white; border:1px solid #333; margin-top:10px; box-sizing: border-box; }
+/* LIKE GIF */
+#like-icon { width: 20px; vertical-align: middle; }
 </style>
 </head>
 
@@ -77,23 +55,23 @@ textarea { width:100%; background:#111; color:white; border:1px solid #333; marg
     <div class="logo"><img src="YouBzz.png"></div>
     <div class="profile">
         <img id="avatar"> <span id="username"></span>
-        <button onclick="editProfile()">Edit</button>
+        <button onclick="editProfile()">Editar</button>
         <button onclick="toggleUpload()">Upload</button>
     </div>
 </header>
 
-<div id="upload" style="display:none; padding:10px;">
-    <h3>Add Video</h3>
-    <input id="url" placeholder="Video URL">
-    <input id="title" placeholder="Title">
-    <button onclick="add()">Add</button>
+<div id="upload" style="display:none; padding:20px; background: #fff; border-bottom: 1px solid #ddd;">
+    <h3>Adicionar Vídeo</h3>
+    <input id="url" placeholder="URL do Vídeo (.mp4)" style="padding:5px; width:250px;">
+    <input id="title" placeholder="Título" style="padding:5px; width:200px;">
+    <button onclick="add()">Publicar</button>
 </div>
 
 <div id="main">
     <div id="videos" class="videos-grid"></div>
 </div>
 
-<div id="watch" style="display:none; padding:10px;">
+<div id="watch" style="display:none; padding:20px;">
     <button onclick="back()">← Voltar</button>
 
     <div class="player-section">
@@ -108,22 +86,22 @@ textarea { width:100%; background:#111; color:white; border:1px solid #333; marg
     </div>
 
     <div class="video-info-bottom">
-        <h2 id="vtitle"></h2>
-        <p id="vowner" style="color:#aaa;"></p>
-        <p>👁 <span id="views">0</span> | 👍 <span id="likes">0</span></p>
-        <button onclick="like()">Like 👍</button>
+        <h2 id="vtitle" style="margin-bottom:5px;"></h2>
+        <p id="vowner"></p>
+        <p>👁 <span id="views">0</span> | <span id="like-area">👍</span> <span id="likes">0</span></p>
+        <button id="likeBtn" onclick="like()">Dar Like</button>
 
-        <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
+        <hr style="border:0; border-top:1px solid #ddd; margin:20px 0;">
 
         <h3>Comentários</h3>
-        <textarea id="commentText" rows="3" placeholder="Escreva algo..."></textarea>
-        <button onclick="comment()">Enviar</button>
+        <textarea id="commentText" rows="3" placeholder="Escreva um comentário público..."></textarea>
+        <button onclick="comment()" style="margin-top:5px; background: #007bff; color: white; border: none;">Comentar</button>
         <div id="comments" style="margin-top:20px;"></div>
     </div>
 </div>
 
 <script>
-// CONFIG FIREBASE
+// CONFIG FIREBASE (MANTIDA)
 const firebaseConfig = {
   apiKey: "AIzaSyDZWRwM3T-ejo3n-geNliqhFs6-i7I5fjk",
   authDomain: "youbzz-ce459.firebaseapp.com",
@@ -135,9 +113,11 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const videosRef = firebase.database().ref("videos");
+const db = firebase.database();
+const videosRef = db.ref("videos");
 
-let profile = JSON.parse(localStorage.getItem("youbzzProfile")) || {name: "User", avatar: "https://i.imgur.com/HeIi0wU.png"};
+let profile = JSON.parse(localStorage.getItem("youbzzProfile")) || {name: "Visitante", avatar: "https://i.imgur.com/HeIi0wU.png"};
+
 function updateProfile(){
     document.getElementById("username").innerText = profile.name;
     document.getElementById("avatar").src = profile.avatar;
@@ -146,7 +126,7 @@ updateProfile();
 
 function editProfile(){
     profile.name = prompt("Novo nome:", profile.name) || profile.name;
-    profile.avatar = prompt("Nova foto:", profile.avatar) || profile.avatar;
+    profile.avatar = prompt("Nova foto (URL):", profile.avatar) || profile.avatar;
     localStorage.setItem("youbzzProfile", JSON.stringify(profile));
     updateProfile();
 }
@@ -154,10 +134,12 @@ function editProfile(){
 let videos = [];
 let currentVideoKey = null;
 
+// Sincronização de Vídeos
 videosRef.on("value", snap => {
     const data = snap.val();
     videos = data ? Object.entries(data).map(([k,v])=>({key:k,...v})) : [];
     renderGrid();
+    if(currentVideoKey) refreshVideoStats(); // Atualiza views/likes se estiver assistindo
 });
 
 function renderGrid(){
@@ -166,7 +148,7 @@ function renderGrid(){
     videos.forEach(v=>{
         const div=document.createElement("div");
         div.className="video-card";
-        div.innerHTML = `<div class="thumb">▶</div><div>${v.title}</div><small>${v.owner}</small>`;
+        div.innerHTML = `<div class="thumb">▶</div><div style="font-weight:bold">${v.title}</div><small>${v.owner}</small>`;
         div.onclick=()=>watch(v);
         container.appendChild(div);
     });
@@ -178,16 +160,14 @@ function loadPlayer(url){
     const video = document.createElement("video");
     video.id = "myVideo";
     video.src = url;
-    video.style.width = "100%";
-    video.style.height = "100%";
+    video.controls = false; // Usando seus botões custom
     container.appendChild(video);
 }
 
 function controlVideo(action) {
     const vid = document.getElementById("myVideo");
     if(!vid) return;
-    if(action === 'play') vid.play();
-    else vid.pause();
+    action === 'play' ? vid.play() : vid.pause();
 }
 
 function watch(v){
@@ -195,14 +175,68 @@ function watch(v){
     document.getElementById("main").style.display="none";
     document.getElementById("watch").style.display="block";
     loadPlayer(v.videoUrl);
+    
     document.getElementById("vtitle").innerText=v.title;
     document.getElementById("vowner").innerText="Postado por: " + v.owner;
-    videosRef.child(v.key).child("views").transaction(x=>(x||0)+1);
+    document.getElementById("like-area").innerHTML = "👍"; // Reseta emoji
+    
+    // Incrementar View
+    videosRef.child(v.key).child("views").transaction(x => (x || 0) + 1);
+    
+    loadComments();
+    refreshVideoStats();
+}
+
+function refreshVideoStats() {
+    const v = videos.find(vid => vid.key === currentVideoKey);
+    if(v) {
+        document.getElementById("views").innerText = v.views || 0;
+        document.getElementById("likes").innerText = v.likes || 0;
+    }
+}
+
+function like(){
+    if(!currentVideoKey) return;
+    videosRef.child(currentVideoKey).child("likes").transaction(x => (x || 0) + 1);
+    // Troca para o GIF solicitado
+    document.getElementById("like-area").innerHTML = `<img src="like.gif" id="like-icon">`;
+}
+
+// LOGICA DE COMENTÁRIOS VOLTANDO A FUNCIONAR
+function comment(){
+    const text = document.getElementById("commentText").value;
+    if(!text || !currentVideoKey) return;
+
+    const newComment = {
+        user: profile.name,
+        text: text,
+        timestamp: Date.now()
+    };
+
+    videosRef.child(currentVideoKey).child("comments").push(newComment);
+    document.getElementById("commentText").value = "";
+}
+
+function loadComments(){
+    const container = document.getElementById("comments");
+    videosRef.child(currentVideoKey).child("comments").on("value", snap => {
+        container.innerHTML = "";
+        const data = snap.val();
+        if(data) {
+            Object.values(data).reverse().forEach(c => {
+                const div = document.createElement("div");
+                div.className = "comment-item";
+                div.innerHTML = `<strong>${c.user}</strong>: <span>${c.text}</span>`;
+                container.appendChild(div);
+            });
+        }
+    });
 }
 
 function back(){
     const vid = document.getElementById("myVideo");
     if(vid) vid.pause();
+    currentVideoKey = null;
     document.getElementById("watch").style.display="none";
     document.getElementById("main").style.display="block";
 }
@@ -211,15 +245,23 @@ function add(){
     const url = document.getElementById("url").value;
     const title = document.getElementById("title").value || "Sem título";
     if(url) {
-        videosRef.push({ title, videoUrl:url, owner: profile.name, views:0, likes:0 });
+        videosRef.push({ 
+            title, 
+            videoUrl: url, 
+            owner: profile.name, 
+            views: 0, 
+            likes: 0,
+            comments: {} 
+        });
         document.getElementById("url").value = "";
+        document.getElementById("title").value = "";
         toggleUpload();
     }
 }
 
 function toggleUpload(){
-    const el=document.getElementById("upload");
-    el.style.display = el.style.display==="none"?"block":"none";
+    const el = document.getElementById("upload");
+    el.style.display = el.style.display === "none" ? "block" : "none";
 }
 </script>
 </body>
